@@ -1,29 +1,93 @@
 import React from 'react'
 import Head from 'next/head'
+import { scoreByFrequency } from '../util/sort'
 import styles from '../styles/Home.module.css'
 
 export default function Home() {
-  const [trending, setTrending] = React.useState({
-    excluded: {
-      ucWords: [],
-      words: [],
-    },
-    words: {
-      hashTags: [],
-      ucWords: [],
-      words: [],
-    },
+  const [loading, setLoading] = React.useState(false)
+  const [links, setLinks] = React.useState([])
+  const [words, setWords] = React.useState({
+    ucWords: [],
+    words: [],
+    hashTags: [],
   })
 
+  const [excludedWords, setExcludedWords] = React.useState({
+    ucWords: [],
+    words: [],
+  })
+  const getLinks = async () => {
+    setLoading(true)
+    const res = await fetch('/api/crawl/links')
+    const resultObj = await res.json()
+    const links = resultObj?.result
+
+    setLinks(links)
+    setLoading(false)
+  }
+
+  const handleBtnClick = () => {
+    getLinks()
+  }
+
   React.useEffect(() => {
-    const getWords = async () => {
-      const res = await fetch('/api/crawl')
+    const getWordsInPost = async (link, bodySelector, wordMinLen = 2) => {
+      const res = await fetch('/api/crawl/post', {
+        method: 'POST',
+        body: JSON.stringify({
+          link,
+          bodySelector,
+          wordMinLen,
+        }),
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+      })
+
       const resultObj = await res.json()
-      setTrending(resultObj.result)
+      return resultObj.result
     }
 
-    getWords()
-  }, [])
+    const setAllPostWords = async () => {
+      const bodySelector = '.thing .usertext-body'
+      const wordList = []
+      const ucWordList = []
+      const hashTags = []
+
+      setLoading(true)
+
+      for (let i = 0; i < links.length; i++) {
+        const postWords = await getWordsInPost(links[i], bodySelector)
+
+        wordList.push(...postWords.allWords)
+        ucWordList.push(...postWords.ucWords)
+        hashTags.push(...postWords.hashTags)
+      }
+
+      const hashTagsSorted = scoreByFrequency(hashTags)
+      const ucWordsSorted = scoreByFrequency(ucWordList)
+      const allWordsSorted = scoreByFrequency(wordList)
+
+      setWords({
+        ucWords: ucWordsSorted,
+        words: allWordsSorted,
+        hashTags: hashTagsSorted,
+      })
+      setLoading(false)
+    }
+
+    setAllPostWords()
+  }, [links])
+
+  React.useEffect(() => {
+    const getExcludedWords = async () => {
+      const res = await fetch('/api/crawl/excludedWords')
+      const resultObj = await res.json()
+      const words = resultObj?.result
+      setExcludedWords(words)
+    }
+    getExcludedWords()
+  }, [links])
 
   return (
     <div className={styles.container}>
@@ -34,43 +98,68 @@ export default function Home() {
       <main className={styles.main}>
         <h1 className={styles.title}>Trending:</h1>
 
+        <button
+          className={styles.fetchBtn}
+          type="button"
+          onClick={handleBtnClick}
+        >
+          Update
+        </button>
+
+        {loading && <div className={styles.loader}>LOADING...</div>}
+
         <div className={styles.grid}>
           <div className={styles.card}>
             <h2>Hashtags:</h2>
-            <ol>
-              {trending.words.hashTags.map((tag) => (
-                <li>{tag}</li>
+            <ol className={styles.list}>
+              {words?.hashTags?.list?.map((tag, i) => (
+                <li key={i}>
+                  <div className={styles.listItem}>
+                    <span>{tag}</span>
+                    <span>{words.hashTags.score[tag]}</span>
+                  </div>
+                </li>
               ))}
             </ol>
           </div>
 
           <div className={styles.card}>
             <h2>Uppercased words:</h2>
-            <ol>
-              {trending.words.ucWords.map((word) => (
-                <li>{word}</li>
+            <ol className={styles.list}>
+              {words?.ucWords?.list?.map((word, i) => (
+                <li key={i}>
+                  <div className={styles.listItem}>
+                    <span>{word}</span>
+                    <span>{words.ucWords.score[word]}</span>
+                  </div>
+                </li>
               ))}
             </ol>
 
             <h2>Excluded Uppercased words:</h2>
             <ul>
-              {trending.excluded.ucWords.map((word) => (
-                <li>{word}</li>
+              {excludedWords?.ucWords?.map((word, i) => (
+                <li key={i}>{word}</li>
               ))}
             </ul>
           </div>
           <div className={styles.card}>
             <h2>Words:</h2>
-            <ol>
-              {trending.words.words.map((word) => (
-                <li>{word}</li>
+            <ol className={styles.list}>
+              {words?.words?.list?.map((word, i) => (
+                <li key={i}>
+                  <div className={styles.listItem}>
+                    <span>{word}</span>
+                    <span>{words.words.score[word]}</span>
+                  </div>
+                </li>
               ))}
             </ol>
 
             <h2>Excluded words:</h2>
             <ul>
-              {trending.excluded.words.map((word) => (
-                <li>{word}</li>
+              {excludedWords?.words?.map((word, i) => (
+                <li key={i}>{word}</li>
               ))}
             </ul>
           </div>

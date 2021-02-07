@@ -15,7 +15,21 @@
   align-items: center;
 }
 
-.title {
+.main > * + * {
+  margin-top: 10px;
+}
+
+@keyframes loader {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(5px);
+  }
+}
+
+.loader {
+  animation: loader 1s ease-in-out 2s infinite alternate;
 }
 
 .grid {
@@ -24,7 +38,6 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   grid-auto-rows: minmax(100px, auto);
-  margin-top: 3rem;
 }
 
 .card {
@@ -39,4 +52,14 @@
     width: 100%;
     flex-direction: column;
   }
+}
+
+.list {
+  max-width: 300px;
+  max-height: 650px;
+  overflow: auto;
+}
+.listItem {
+  display: flex;
+  justify-content: space-between;
 }
