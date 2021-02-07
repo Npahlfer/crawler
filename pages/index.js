@@ -96,35 +96,34 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>Trending:</h1>
+        <h1 className={styles.title}>Trending words</h1>
 
         <button
           className={styles.fetchBtn}
           type="button"
           onClick={handleBtnClick}
         >
-          Update
+          Fetch words
         </button>
 
-        {loading && <div className={styles.loader}>LOADING...</div>}
+        {loading && <div className={styles.loader}>🚀LOADING...🚀</div>}
+
+        {loading && (
+          <p>
+            Scraping /r/wallstreetbets front page posts. This can take a while
+            (~40sec).
+          </p>
+        )}
 
         <div className={styles.grid}>
           <div className={styles.card}>
-            <h2>Hashtags:</h2>
-            <ol className={styles.list}>
-              {words?.hashTags?.list?.map((tag, i) => (
-                <li key={i}>
-                  <div className={styles.listItem}>
-                    <span>{tag}</span>
-                    <span>{words.hashTags.score[tag]}</span>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className={styles.card}>
             <h2>Uppercased words:</h2>
+
+            <div className={styles.head}>
+              <span>Word:</span>
+              <span>Count:</span>
+            </div>
+
             <ol className={styles.list}>
               {words?.ucWords?.list?.map((word, i) => (
                 <li key={i}>
@@ -134,17 +133,27 @@ export default function Home() {
                   </div>
                 </li>
               ))}
+              {!words?.ucWords?.list ||
+                (words?.ucWords?.list.length === 0 && (
+                  <li className={styles.listEmpty}>...</li>
+                ))}
             </ol>
 
             <h2>Excluded Uppercased words:</h2>
-            <ul>
+            <ul className={styles.list}>
               {excludedWords?.ucWords?.map((word, i) => (
                 <li key={i}>{word}</li>
               ))}
             </ul>
           </div>
+
           <div className={styles.card}>
             <h2>Words:</h2>
+
+            <div className={styles.head}>
+              <span>Word:</span>
+              <span>Count:</span>
+            </div>
             <ol className={styles.list}>
               {words?.words?.list?.map((word, i) => (
                 <li key={i}>
@@ -154,14 +163,40 @@ export default function Home() {
                   </div>
                 </li>
               ))}
+              {!words?.words?.list ||
+                (words?.words?.list.length === 0 && (
+                  <li className={styles.listEmpty}>...</li>
+                ))}
             </ol>
 
             <h2>Excluded words:</h2>
-            <ul>
+            <ul className={styles.list}>
               {excludedWords?.words?.map((word, i) => (
                 <li key={i}>{word}</li>
               ))}
             </ul>
+          </div>
+
+          <div className={styles.card}>
+            <h2>Hashtags:</h2>
+            <div className={styles.head}>
+              <span>Word:</span>
+              <span>Count:</span>
+            </div>
+            <ol className={styles.list}>
+              {words?.hashTags?.list?.map((tag, i) => (
+                <li key={i}>
+                  <div className={styles.listItem}>
+                    <span>{tag}</span>
+                    <span>{words.hashTags.score[tag]}</span>
+                  </div>
+                </li>
+              ))}
+              {!words?.hashTags?.list ||
+                (words?.hashTags?.list.length === 0 && (
+                  <li className={styles.listEmpty}>...</li>
+                ))}
+            </ol>
           </div>
         </div>
       </main>
