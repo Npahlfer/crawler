@@ -106,7 +106,11 @@ export default function Home() {
           Fetch words
         </button>
 
-        {loading && <div className={styles.loader}>🚀LOADING...🚀</div>}
+        {loading && (
+          <div className={styles.loader}>
+            <span>🚀</span>LOADING...<span>🚀</span>
+          </div>
+        )}
 
         {loading && (
           <p>

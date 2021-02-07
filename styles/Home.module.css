@@ -28,16 +28,20 @@
   }
 }
 
-.loader {
+.loader span {
+  display: inline-block;
   animation: loader 1s ease-in-out infinite alternate;
 }
 
 .grid {
   width: 100%;
+  max-width: 1200px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   grid-auto-flow: row;
   gap: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .card {
