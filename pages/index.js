@@ -102,6 +102,7 @@ export default function Home() {
           className={styles.fetchBtn}
           type="button"
           onClick={handleBtnClick}
+          disabled={loading}
         >
           Fetch words
         </button>
